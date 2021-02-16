@@ -21,11 +21,13 @@ package org.zaproxy.zap.extension.httpsinfo;
 
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.TextField;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JPanel;
 import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.control.Control.Mode;
 import org.parosproxy.paros.extension.AbstractPanel;
@@ -55,6 +57,7 @@ public class ExtensionHttpsInfo extends ExtensionAdaptor implements SessionChang
     private MenuEntry httpsMenuEntry;
     private AbstractPanel httpsInfoPanel;
     private TabbedPanel2 httpsInfoTabsPanel;
+    private boolean usageMessageVisible = true;
 
     public ExtensionHttpsInfo() {
         super();
@@ -145,6 +148,7 @@ public class ExtensionHttpsInfo extends ExtensionAdaptor implements SessionChang
     }
 
     protected void addTab(HttpMessage msg) {
+        removeUsageMessage();
         String hostname = msg.getRequestHeader().getHostName();
         String tabName =
                 hostname
@@ -175,12 +179,36 @@ public class ExtensionHttpsInfo extends ExtensionAdaptor implements SessionChang
         getHttpsInfoTabsPanel().getTabList().get(index).setName(title);
     }
 
+    private void removeUsageMessage(){
+        if (usageMessageVisible){
+            getHttpsInfoTabsPanel().removeAll();
+            usageMessageVisible = false;
+        }
+
+    }
+
+    private void addUsageMessage() {
+        usageMessageVisible = true;
+        JPanel panel = new JPanel();
+        TextField message = new TextField(Constant.messages.getString("httpsinfo.usage.message"));
+        message.setEditable(false);
+        panel.add(message);
+        addTab(
+                Constant.messages.getString("httpsinfo.usage.title"),
+                new ImageIcon(ExtensionHttpsInfo.class.getResource(ICON_PATH)),
+                panel,
+                true,
+                true,
+                0);
+    }
+
     @Override
     public void sessionAboutToChange(Session arg0) {}
 
     @Override
     public void sessionChanged(Session arg0) {
         getHttpsInfoTabsPanel().removeAll();
+        addUsageMessage();
     }
 
     @Override
